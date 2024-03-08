@@ -12,8 +12,6 @@ import string
 def initiate_process(group):
     print('Process {} with group - {}'.format(os.getpid(), group))
 
-        #return result_process
-
 
 abc = list(string.ascii_lowercase)
 n_processes = multiprocessing.cpu_count()
@@ -26,8 +24,11 @@ print('The list will be divided in chuncks of {} elements'.format(n_processes))
 print()
 
 for i in range(0,len(groups)):
-	print('Group {} - {}'.format(i+1,groups[i]))
+    print('Group {} - {}'.format(i+1,groups[i]))
 print()
 
-with multiprocessing.Pool(n_processes) as pexecutor:
-    pexecutor.map(initiate_process, groups)
+with concurrent.futures.ProcessPoolExecutor(max_workers=n_processes) as pexecutor:
+    result = []
+    futures = [ pexecutor.submit(initiate_process, g) for g in groups ]
+    for future in concurrent.futures.as_completed(futures):
+        result.append(future)
